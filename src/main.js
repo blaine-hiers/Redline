@@ -270,7 +270,7 @@ function updateTray() {
   tray.setImage(trayImage(level));
   const f = (s) => (s && typeof s.pct5h === 'number' ? `${s.pct5h}%` : '—');
   const parts = providers.map((p) => `${p.label} 5h ${f(lastSnap?.services?.[p.id])}`);
-  tray.setToolTip(['Gauge', ...parts].join(' · '));
+  tray.setToolTip(['Redline', ...parts].join(' · '));
 }
 
 function applyAutoStart() {
@@ -335,7 +335,7 @@ function buildMenu() {
     { label: 'Read usage aloud', click: () => { win?.webContents.send('speak', summaryPhrase(lastSnap?.services, providers)); } },
     { label: 'Open config file', click: () => shell.openPath(path.join(app.getPath('userData'), 'config.json')) },
     { type: 'separator' },
-    { label: 'Quit Gauge', click: () => app.quit() },
+    { label: 'Quit Redline', click: () => app.quit() },
   ]);
 }
 
@@ -508,7 +508,7 @@ app.whenReady().then(async () => {
   hist = FAKE ? fakeHistory(providers) : loadHistory(app.getPath('userData'));
   createWindow();
   tray = new Tray(trayImage('ok'));
-  tray.setToolTip('Gauge');
+  tray.setToolTip('Redline');
   tray.on('click', () => win?.show());
   tray.on('right-click', () => tray.popUpContextMenu(buildMenu()));
   ipcMain.handle('get-init', () => snapshotPayload());

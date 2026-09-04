@@ -1,4 +1,4 @@
-# Gauge
+# Redline
 
 A floating Windows desktop widget that shows your **Claude Code** and **Codex CLI**
 usage limits — the 5-hour and weekly windows — with live reset countdowns and
@@ -17,8 +17,8 @@ lives in the system tray.
 
 ## Install
 
-Download the installer (`Gauge Setup <version>.exe`) or the portable exe
-(`Gauge <version>.exe`) from the GitHub release, or build them yourself
+Download the installer (`Redline Setup <version>.exe`) or the portable exe
+(`Redline <version>.exe`) from the GitHub release, or build them yourself
 (see **Build** below) and grab them from `dist/`.
 
 - **Installer**: per-user install, no admin prompt (UAC) required. Lets you pick
@@ -202,7 +202,7 @@ In `config.json` the same thing looks like:
 
 ## Config
 
-`config.json` in the Electron userData folder (`%APPDATA%/gauge`), editable
+`config.json` in the Electron userData folder (`%APPDATA%/redline`), editable
 by hand or via the context menu. `history.json` lives beside it and holds the
 usage samples behind the sparklines — one sample per 5 minutes at most, kept for
 7 days (2500 max), written back a moment after each pulse. Each meter owns two
@@ -273,8 +273,8 @@ two default meters, so the committed PNGs only move when a layout does; add
 `--providers 3` to a `--fake` run to see how a layout handles a third row, or
 `--providers all` (or `--providers cursor,grok`) to preview the built-in meters
 that ship switched off, with deterministic data and no network. Screenshot mode starts
-from Gauge's built-in defaults, ignoring any saved config, and never
-writes to `%APPDATA%/gauge`.
+from Redline's built-in defaults, ignoring any saved config, and never
+writes to `%APPDATA%/redline`.
 
 Each theme draws a sparkline of the last 24 hours of the 5h window under its 5h
 row (block characters in **terminal**, an SVG polyline elsewhere); a failed pulse

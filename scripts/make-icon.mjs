@@ -1,4 +1,4 @@
-// Generates build/icon.png — a 256x256 render of the same "Gauge"
+// Generates build/icon.png — a 256x256 render of the same "Redline"
 // glyph (a level-colored disc with a heartbeat/pulse line across it) used
 // for the tray icon, so the installer/taskbar icon matches the tray.
 //

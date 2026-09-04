@@ -1,5 +1,5 @@
 {
-  "name": "gauge",
+  "name": "redline",
   "version": "0.1.0",
   "description": "Floating desktop widget for Claude Code + Codex CLI usage limits",
   "main": "src/main.js",
@@ -21,8 +21,8 @@
     "electron-winstaller@5.4.0": true
   },
   "build": {
-    "appId": "com.blainehiers.gauge",
-    "productName": "Gauge",
+    "appId": "com.blainehiers.redline",
+    "productName": "Redline",
     "files": [
       "src/**",
       "renderer/**",

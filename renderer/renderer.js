@@ -205,7 +205,7 @@ function renderHud(list, _cfg, h) {
 }
 
 // ---------- neon ----------
-function gauge(name, id, v, spark, w) {
+function redline(name, id, v, spark, w) {
   const C = 163.4, off = C - (C * (v.p5 ?? 0)) / 100;
   const pid = ` data-provider="${esc(id)}"`;
   if (!v.ok) return `<div class="nrow err"${pid}><div class="info"><div class="nm">${name}</div><div class="meta err-text" title="${esc(v.error)}">${esc(v.error)}</div></div></div>`;
@@ -232,8 +232,8 @@ function gauge(name, id, v, spark, w) {
 }
 function renderNeon(list, _cfg, h) {
   const sp = (id) => (h ? `<div class="sparkrow">${sparkline(h[id], 186, 16)}</div>` : '');
-  const rows = list.map((m) => gauge(esc(m.label.toUpperCase()), m.id, m.v, sp(m.id), m.w)).join('');
-  return `<div class="w-neon">${cogButton('neon')}<div class="wtitle">◇ GAUGE ◇</div>${rows}</div>`;
+  const rows = list.map((m) => redline(esc(m.label.toUpperCase()), m.id, m.v, sp(m.id), m.w)).join('');
+  return `<div class="w-neon">${cogButton('neon')}<div class="wtitle">◇ REDLINE ◇</div>${rows}</div>`;
 }
 
 // Layout → render function. Several theme ids share one layout (paper and

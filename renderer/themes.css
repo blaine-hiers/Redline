@@ -1,4 +1,4 @@
-/* Gauge — eight themes over one data layer.
+/* Redline — eight themes over one data layer.
    A theme is a *layout* (the .w-glass / .w-term / .w-hud / .w-neon card its
    render function emits) plus a *skin*. The four blocks below are the layouts
    and their default skins; the SKINS section further down re-skins three of
@@ -165,7 +165,7 @@ body[data-solid="1"] #root > div { border-radius: 0; }
 .w-hud [data-provider="codex"] .spark polyline { stroke: #63c8f2; }
 .w-hud .bignum { font-size: 24px; font-weight: 600; }
 
-/* ============ D — NEON GAUGE ============ */
+/* ============ D — NEON REDLINE ============ */
 .w-neon {
   width: 300px; margin: 10px; position: relative;
   background: linear-gradient(160deg, rgba(24, 16, 38, 0.94), rgba(10, 14, 30, 0.94));

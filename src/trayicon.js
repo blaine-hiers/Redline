@@ -157,7 +157,7 @@ function pulseGlyphColorAt(size, discColor) {
 }
 
 // A filled disc (colored by alert level) with a pulse/heartbeat line across
-// it — the "Gauge" glyph. Deterministic; same (size, level) always
+// it — the "Redline" glyph. Deterministic; same (size, level) always
 // produces the same bytes.
 function trayIconPng(size, level) {
   const discColor = LEVEL_COLORS[level];

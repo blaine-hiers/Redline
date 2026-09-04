@@ -147,7 +147,7 @@ async function collectCopilot({
     Authorization: `token ${oauth}`,
     Accept: 'application/json',
     'X-GitHub-Api-Version': API_VERSION,
-    'User-Agent': 'gauge',
+    'User-Agent': 'redline',
   });
   if (!headers) return fail('Copilot: invalid credential');
   let res;
