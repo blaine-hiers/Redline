@@ -1,0 +1,39 @@
+{
+  "copilot_plan": "individual",
+  "access_type_sku": "copilot_pro",
+  "chat_enabled": true,
+  "cli_enabled": true,
+  "quota_reset_date": "2026-09-01",
+  "quota_snapshots": {
+    "chat": {
+      "quota_id": "chat",
+      "entitlement": 0,
+      "remaining": 0,
+      "unlimited": true,
+      "overage_count": 0,
+      "overage_permitted": false,
+      "percent_remaining": 100,
+      "has_quota": false
+    },
+    "completions": {
+      "quota_id": "completions",
+      "entitlement": 0,
+      "remaining": 0,
+      "unlimited": true,
+      "overage_count": 0,
+      "overage_permitted": false,
+      "percent_remaining": 100,
+      "has_quota": false
+    },
+    "premium_interactions": {
+      "quota_id": "premium_interactions",
+      "entitlement": 300,
+      "remaining": 87.5,
+      "unlimited": false,
+      "overage_count": 0,
+      "overage_permitted": true,
+      "percent_remaining": 29.166666666666668,
+      "has_quota": true
+    }
+  }
+}

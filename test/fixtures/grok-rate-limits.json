@@ -1,0 +1,7 @@
+{
+  "windowSizeSeconds": 86400,
+  "remainingQueries": 14,
+  "totalQueries": 20,
+  "lowEffortRateLimits": null,
+  "highEffortRateLimits": null
+}

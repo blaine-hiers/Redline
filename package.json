@@ -1,0 +1,47 @@
+{
+  "name": "gauge",
+  "version": "0.1.0",
+  "description": "Floating desktop widget for Claude Code + Codex CLI usage limits",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev:fake": "electron . --fake",
+    "test": "node --test",
+    "dist": "electron-builder --win",
+    "dist:dir": "electron-builder --win --dir",
+    "screenshots": "electron . --fake --screenshot docs/screenshots"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^38.0.0",
+    "electron-builder": "26.15.3"
+  },
+  "allowScripts": {
+    "electron@38.8.6": true,
+    "electron-winstaller@5.4.0": true
+  },
+  "build": {
+    "appId": "com.blainehiers.gauge",
+    "productName": "Gauge",
+    "files": [
+      "src/**",
+      "renderer/**",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false
+    }
+  }
+}
