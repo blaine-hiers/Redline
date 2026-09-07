@@ -86,19 +86,34 @@ test('isValidId rejects the snapshot payload keys it would collide with', () => 
 });
 
 // ---------- a later change review: a hung collector must not hold the pulse ----------
+// A literal `new Promise(() => {})` models a hung collector accurately but leaves a
+// forever-pending promise behind, and Node 20's test runner reports that as
+// "Promise resolution is still pending but the event loop has already resolved",
+// failing the rest of the file. So each stuck collector hands back its resolver and
+// the test releases it once the assertions are done: the collector is still hung for
+// the whole of the window under test, and nothing is left pending afterwards.
+function hungCollector() {
+  let release;
+  const collect = () => new Promise((resolve) => { release = resolve; });
+  return { collect, release: () => release && release() };
+}
+
 test('collectWithDeadline gives up on a collector that never settles', async () => {
-  const p = { id: 'stuck', collect: () => new Promise(() => {}) };
+  const stuck = hungCollector();
+  const p = { id: 'stuck', collect: stuck.collect };
   const out = await collectWithDeadline(p, 20);
   assert.strictEqual(out.ok, false);
   assert.strictEqual(out.stale, true);
   assert.strictEqual(out.retryAfterMs, null); // ladder only
   assert.match(out.error, /timed out/);
+  stuck.release();
 });
 
 test('one hung meter does not stop the others resolving in the same pass', async () => {
   const good = { pct5h: 12, ok: true };
+  const stuck = hungCollector();
   const list = [
-    { id: 'stuck', collect: () => new Promise(() => {}) },
+    { id: 'stuck', collect: stuck.collect },
     { id: 'fine', collect: () => Promise.resolve(good) },
     { id: 'thrower', collect: () => { throw new Error('boom'); } },
   ];
@@ -108,6 +123,7 @@ test('one hung meter does not stop the others resolving in the same pass', async
   assert.strictEqual(settled[1], good);
   assert.strictEqual(settled[2].ok, false);
   assert.match(settled[2].error, /meter failed/);
+  stuck.release();
 });
 
 test('collectWithDeadline survives a collector that is missing or returns junk', async () => {
