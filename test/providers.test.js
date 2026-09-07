@@ -86,19 +86,48 @@ test('isValidId rejects the snapshot payload keys it would collide with', () => 
 });
 
 // ---------- a later change review: a hung collector must not hold the pulse ----------
+// Testing a collector that never settles is awkward for a reason worth writing down.
+// collectWithDeadline unrefs its deadline timer so a slow meter can never hold the
+// app open, which is right for the product. But when the collector never settles,
+// that unref'd timer is the only pending work in the process, so Node is entitled to
+// decide the loop is finished before the deadline fires. Node 20 then reports
+// "Promise resolution is still pending but the event loop has already resolved" and
+// cancels every remaining test in the file. Node 24 does not, which is why this
+// passed locally and only broke in CI.
+//
+// So the helper does two things: it holds a ref'd timer to keep the loop alive for
+// exactly as long as the test needs one, and it hands back a resolver so the
+// abandoned promise chain settles instead of being left pending.
+function hungCollector() {
+  let release = null;
+  const keepAlive = setInterval(() => {}, 1000);
+  const collect = () => new Promise((resolve) => { release = resolve; });
+  const settle = async () => {
+    if (release) release(null);
+    clearInterval(keepAlive);
+    // The collector's promise is the head of a .then chain inside
+    // collectWithDeadline; a macrotask tick guarantees that chain has drained.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  };
+  return { collect, settle };
+}
+
 test('collectWithDeadline gives up on a collector that never settles', async () => {
-  const p = { id: 'stuck', collect: () => new Promise(() => {}) };
+  const stuck = hungCollector();
+  const p = { id: 'stuck', collect: stuck.collect };
   const out = await collectWithDeadline(p, 20);
   assert.strictEqual(out.ok, false);
   assert.strictEqual(out.stale, true);
   assert.strictEqual(out.retryAfterMs, null); // ladder only
   assert.match(out.error, /timed out/);
+  await stuck.settle();
 });
 
 test('one hung meter does not stop the others resolving in the same pass', async () => {
   const good = { pct5h: 12, ok: true };
+  const stuck = hungCollector();
   const list = [
-    { id: 'stuck', collect: () => new Promise(() => {}) },
+    { id: 'stuck', collect: stuck.collect },
     { id: 'fine', collect: () => Promise.resolve(good) },
     { id: 'thrower', collect: () => { throw new Error('boom'); } },
   ];
@@ -108,6 +137,7 @@ test('one hung meter does not stop the others resolving in the same pass', async
   assert.strictEqual(settled[1], good);
   assert.strictEqual(settled[2].ok, false);
   assert.match(settled[2].error, /meter failed/);
+  await stuck.settle();
 });
 
 test('collectWithDeadline survives a collector that is missing or returns junk', async () => {

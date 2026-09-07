@@ -284,7 +284,9 @@ function collectDeadlineMs(provider) {
 
 function collectWithDeadline(provider, deadlineMs = collectDeadlineMs(provider)) {
   let timer = null;
+  let releaseGuard = null;
   const guard = new Promise((resolve) => {
+    releaseGuard = resolve;
     timer = setTimeout(() => resolve(failResult('meter timed out')), deadlineMs);
     if (timer && typeof timer.unref === 'function') timer.unref(); // never hold the process open
   });
@@ -294,7 +296,16 @@ function collectWithDeadline(provider, deadlineMs = collectDeadlineMs(provider))
     .then(() => provider.collect())
     .then((r) => (r && typeof r === 'object' ? r : failResult('meter returned no reading')))
     .catch(() => failResult('meter failed'));
-  return Promise.race([attempt, guard]).finally(() => clearTimeout(timer));
+  return Promise.race([attempt, guard]).finally(() => {
+    clearTimeout(timer);
+    // Promise.race abandons the loser, so clearing the timer used to leave guard
+    // pending for the life of the process on every call where the collector won.
+    // Harmless at runtime, but Node 20's test runner reports it as "Promise
+    // resolution is still pending but the event loop has already resolved" and
+    // fails the run. Settling it here costs nothing: the race is already decided,
+    // so this value is never the one returned.
+    if (releaseGuard) releaseGuard(null);
+  });
 }
 
 // The ordered list of *enabled* providers — what pulse() and the renderer
