@@ -86,21 +86,27 @@ test('isValidId rejects the snapshot payload keys it would collide with', () => 
 });
 
 // ---------- a later change review: a hung collector must not hold the pulse ----------
-// A literal `new Promise(() => {})` models a hung collector accurately but leaves a
-// forever-pending promise behind, and Node 20's test runner reports that as
-// "Promise resolution is still pending but the event loop has already resolved",
-// failing the rest of the file. So each stuck collector hands back its resolver and
-// the test releases it once the assertions are done: the collector is still hung for
-// the whole of the window under test, and nothing is left pending afterwards.
+// Testing a collector that never settles is awkward for a reason worth writing down.
+// collectWithDeadline unrefs its deadline timer so a slow meter can never hold the
+// app open, which is right for the product. But when the collector never settles,
+// that unref'd timer is the only pending work in the process, so Node is entitled to
+// decide the loop is finished before the deadline fires. Node 20 then reports
+// "Promise resolution is still pending but the event loop has already resolved" and
+// cancels every remaining test in the file. Node 24 does not, which is why this
+// passed locally and only broke in CI.
+//
+// So the helper does two things: it holds a ref'd timer to keep the loop alive for
+// exactly as long as the test needs one, and it hands back a resolver so the
+// abandoned promise chain settles instead of being left pending.
 function hungCollector() {
   let release = null;
+  const keepAlive = setInterval(() => {}, 1000);
   const collect = () => new Promise((resolve) => { release = resolve; });
-  // Resolving is necessary but not sufficient. The collector's promise sits at the
-  // head of a .then chain inside collectWithDeadline, and that chain needs the
-  // microtask queue to drain before nothing is pending. A macrotask tick is the
-  // simplest thing that guarantees it.
   const settle = async () => {
     if (release) release(null);
+    clearInterval(keepAlive);
+    // The collector's promise is the head of a .then chain inside
+    // collectWithDeadline; a macrotask tick guarantees that chain has drained.
     await new Promise((resolve) => setTimeout(resolve, 0));
   };
   return { collect, settle };
