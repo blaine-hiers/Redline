@@ -93,9 +93,17 @@ test('isValidId rejects the snapshot payload keys it would collide with', () => 
 // the test releases it once the assertions are done: the collector is still hung for
 // the whole of the window under test, and nothing is left pending afterwards.
 function hungCollector() {
-  let release;
+  let release = null;
   const collect = () => new Promise((resolve) => { release = resolve; });
-  return { collect, release: () => release && release() };
+  // Resolving is necessary but not sufficient. The collector's promise sits at the
+  // head of a .then chain inside collectWithDeadline, and that chain needs the
+  // microtask queue to drain before nothing is pending. A macrotask tick is the
+  // simplest thing that guarantees it.
+  const settle = async () => {
+    if (release) release(null);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  };
+  return { collect, settle };
 }
 
 test('collectWithDeadline gives up on a collector that never settles', async () => {
@@ -106,7 +114,7 @@ test('collectWithDeadline gives up on a collector that never settles', async () 
   assert.strictEqual(out.stale, true);
   assert.strictEqual(out.retryAfterMs, null); // ladder only
   assert.match(out.error, /timed out/);
-  stuck.release();
+  await stuck.settle();
 });
 
 test('one hung meter does not stop the others resolving in the same pass', async () => {
@@ -123,7 +131,7 @@ test('one hung meter does not stop the others resolving in the same pass', async
   assert.strictEqual(settled[1], good);
   assert.strictEqual(settled[2].ok, false);
   assert.match(settled[2].error, /meter failed/);
-  stuck.release();
+  await stuck.settle();
 });
 
 test('collectWithDeadline survives a collector that is missing or returns junk', async () => {
